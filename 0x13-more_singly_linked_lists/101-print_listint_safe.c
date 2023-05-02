@@ -98,4 +98,4 @@ int is_in_nodes(listnode_t *head, const listint_t *ptr)
 		head = head->next;
 	}
 	return (0);
-}}
+}
