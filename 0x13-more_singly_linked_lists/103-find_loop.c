@@ -1,96 +1,59 @@
 #include "lists.h"
 
-size_t looped_listint_count(listint_t *head);
-size_t free_listint_safe(listint_t **h);
-
 /**
- * looped_listint_count - Counts the number of unique nodes
- *                      in a looped listint_t linked list.
- * @head: A pointer to the head of the listint_t to check.
- *
- * Return: If the list is not looped - 0.
- *         Otherwise - the number of unique nodes in the list.
- */
-size_t looped_listint_count(listint_t *head)
+* checker - helper function taht checks if stuff matches and if we in a loop
+* @head: the head node
+*
+* Description: this function will check if we are in a loop
+* Return: either Null or where we know a loop exists
+* A: We will make 2 pointers that are equal to the head
+*	kinda like DNA leading and lagging strand during replication
+* B: We make the leading jump 2 times. we have the if and else check
+*	there because if leading exists and we can go next, we do it
+* C: if we cant then that means there was no infinite loop so return NULL
+* D: So in this loop, if the lagging ever matched with the leading,
+*	we know a loop existed and that we should return that back
+*/
+
+listint_t *checker(listint_t *head)
 {
-	listint_t *tortoise, *hare;
-	size_t nodes = 1;
+	listint_t *lagging = NULL;
+	listint_t *leading = NULL;
 
-	if (head == NULL || head->next == NULL)
-		return (0);
-
-	tortoise = head->next;
-	hare = (head->next)->next;
-
-	while (hare)
+	lagging = leading = head;/* A */
+	while (lagging)
 	{
-		if (tortoise == hare)
-		{
-			tortoise = head;
-			while (tortoise != hare)
-			{
-				nodes++;
-				tortoise = tortoise->next;
-				hare = hare->next;
-			}
-
-			tortoise = tortoise->next;
-			while (tortoise != hare)
-			{
-				nodes++;
-				tortoise = tortoise->next;
-			}
-
-			return (nodes);
-		}
-
-		tortoise = tortoise->next;
-		hare = (hare->next)->next;
+		lagging = lagging->next;
+		leading = leading->next;/* B */
+		if (leading && leading->next)
+			leading = leading->next;
+		else/* C */
+			return (NULL);
+		if (lagging == leading)/* D */
+			return (leading);
 	}
-
-	return (0);
+	return (NULL);
 }
 
 /**
- * free_listint_safe - Frees a listint_t list safely (ie.
- *                     can free lists containing loops)
- * @h: A pointer to the address of
- *     the head of the listint_t list.
- *
- * Return: The size of the list that was freed.
- *
- * Description: The function sets the head to NULL.
- */
-size_t free_listint_safe(listint_t **h)
+* find_listint_loop - finds where the loop in a linked list is
+* @head: the head node
+*
+* Description: this is wrong i havent gotten it yhet
+* Return: The address of the node where loop starts or null if none
+* A: While the checker of head is a value, if the returned leading is
+*	equal to the head, then we return the head because that is a loop
+* B: we check if the return value matches our head
+* C: we increment head and run the checker all over again.
+*/
+
+listint_t *find_listint_loop(listint_t *head)
 {
-	listint_t *tmp;
-	size_t nodes, index;
-
-	nodes = looped_listint_count(*h);
-
-	if (nodes == 0)
+	while (checker(head))/* A */
 	{
-		for (; h != NULL && *h != NULL; nodes++)
-		{
-			tmp = (*h)->next;
-			free(*h);
-			*h = tmp;
-		}
+		if (checker(head) == head)/* B */
+			return (head);
+		head = head->next;/* C */
 	}
-
-	else
-	{
-		for (index = 0; index < nodes; index++)
-		{
-			tmp = (*h)->next;
-			free(*h);
-			*h = tmp;
-		}
-
-		*h = NULL;
-	}
-
-	h = NULL;
-
-	return (nodes);
+	return (NULL);
 }
